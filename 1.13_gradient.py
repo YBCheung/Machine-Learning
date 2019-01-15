@@ -40,7 +40,7 @@ def gradAscent(dataArr,labelArr):
     weights=-2*ones((n,1))
     weights2=-2*ones((n,1))
     alpha=[]
-    a=[10,1,1]    #add weight to different variables to train
+    a=[10,1,1]    # add weight to different variables to train
     for i in range(n):
         x=zeros(n)
         for j in range(n):
@@ -48,18 +48,18 @@ def gradAscent(dataArr,labelArr):
                 x[i]=a[i]
         alpha.append(x)
     alpha=mat(alpha)
-    print(alpha)
     accuracy=0
     global_accuracy=0
     total_error=0
     steps=0
     w0=[];w1=[];w2=[]
     # while accuracy<0.99:
-    for i in range(10000):
-        if(global_accuracy<0.99):
-            steps+=1
+    for i in range(1000):
+        if(global_accuracy<0.999):
+            steps+=1                   # step for stabilization
+        learning_rate = 4/(3.0+i)+0.1  # for decline of learning rate
         error=labelMat - sigmoid(dataMat*weights)
-        weights=weights + alpha*dataMat.transpose()*error   # w0 + w1*x + w2*y = 0
+        weights=weights + learning_rate*alpha*dataMat.transpose()*error   # w0 + w1*x + w2*y = 0
         w0.append(float(weights[0]))
         w1.append(float(weights[1]))
         w2.append(float(weights[2]))
