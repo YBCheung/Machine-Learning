@@ -1,26 +1,31 @@
 from numpy import *
 import matplotlib.pyplot as plt
 def loadFileData():
-    dataArr=[];labelArr=[];
+    dataArrTrain=[];labelArrTrain=[];
+    dataArrTest=[];labelArrTest=[];
     fp=open('1_13points.txt')
+    T,F=0,0
     for line in fp.readlines():
         lineArr=line.strip().split(',')
-        dataArr.append([1.0,float(lineArr[0]),float(lineArr[1])])
-        labelArr.append(float(lineArr[2]))
-        T,F=0,0
-        for i in range(len(labelArr)):
-            if labelArr[i]==1:
-                T+=1
-            else:
-                F+=1
-    return dataArr,labelArr, T,F
+        if int(lineArr[2])==1:
+            T+=1
+        else:
+            F+=1
+        if (T+F)%5:
+            dataArrTrain.append([1.0,float(lineArr[0]),float(lineArr[1])])
+            labelArrTrain.append(int(lineArr[2]))
+        else:
+            dataArrTest.append([1.0,float(lineArr[0]),float(lineArr[1])])
+            labelArrTest.append(int(lineArr[2]))
+                
+    return dataArrTrain,labelArrTrain,dataArrTest,labelArrTest, T,F
 
 def sigmoid(y,m):
     # m for rescaling scale (F/T)
     return 1.0/(1+exp(-y)*m)
 
 
-def plotFit(weights):
+def plotFit(weights, dataArr, labelArr):
     n=shape(dataArr)[0]
     xcord1=[];ycord1=[]
     xcord2=[];ycord2=[]
@@ -41,9 +46,9 @@ def plotFit(weights):
     plt.xlabel('X1'); plt.ylabel('X2');
     plt.show()
 
-def gradAscent(dataArr,labelArr):
-    dataMat=mat(dataArr)
-    labelMat=mat(labelArr).transpose()
+def gradAscent(dataArrTrain,labelArrTrain):
+    dataMat=mat(dataArrTrain)
+    labelMat=mat(labelArrTrain).transpose()
     m,n=shape(dataMat)
     weights=ones((n,1))
     alpha=[]
@@ -86,12 +91,11 @@ def gradAscent(dataArr,labelArr):
     plt.show()
     return weights
 
-def stocGradAscent(dataArr,labelArr):
-    dataMat=mat(dataArr)
+def stocGradAscent(dataArrTrain,labelArrTrain):
+    dataMat=mat(dataArrTrain)
     m,n=shape(dataMat)
     weights=-1*ones(n)
     weights=mat(weights).transpose()
-    print(weights)
     alpha=[]
     a=[10,1,1]    # add weight to different variables to train
     for i in range(n):
@@ -113,7 +117,7 @@ def stocGradAscent(dataArr,labelArr):
                 steps+=1       # step for stabilization
             learning_rate = 2/(3.0+j+i)+0.01  # for decline of learning rate
             randIndex=int(random.uniform(0,len(dataIndex)))
-            error=labelArr[randIndex] - sigmoid(float(dataArr[randIndex]*weights), 1.0*F/T)
+            error=labelArrTrain[randIndex] - sigmoid(float(dataArrTrain[randIndex]*weights), 1.0*F/T)
             weights=weights + learning_rate*error*(alpha*dataMat[randIndex].transpose())   # w0 + w1*x + w2*y = 0
             del(dataIndex[randIndex])
             w0.append(weights[0,0])
@@ -121,7 +125,7 @@ def stocGradAscent(dataArr,labelArr):
             w2.append(weights[2,0])
             accuracy=1.0-abs(error)
             global_accuracy=0.8*global_accuracy+0.2*accuracy
-            print("steps: %d, accuracy: %f"%(steps,global_accuracy))
+            # print("steps: %d, accuracy: %f"%(steps,global_accuracy))
 
     print(weights)       
     x=range(len(w0))
@@ -132,7 +136,16 @@ def stocGradAscent(dataArr,labelArr):
     plt.show()
     return weights
 
-dataArr,labelArr,T,F=loadFileData()
-# weights=gradAscent(dataArr,labelArr)
-weights=stocGradAscent(dataArr,labelArr)
-plotFit(weights.getA())
+def test(dataArrTest,labelArrTest):
+    dataMat=mat(dataArrTest)
+    labelMat=mat(labelArrTest).transpose()
+    error=labelMat - sigmoid(dataMat*weights, 1.0)
+    accuracy=1-abs(sum(error))/len(labelArrTest)
+    print("accuracy: %f"%accuracy)
+    plotFit(weights.getA(), dataArrTest,labelArrTest)
+
+dataArrTrain,labelArrTrain,dataArrTest,labelArrTest,T,F=loadFileData()
+weights=gradAscent(dataArrTrain,labelArrTrain)
+# weights=stocGradAscent(dataArrTrain,labelArrTrain)
+plotFit(weights.getA(),dataArrTrain,labelArrTrain)
+test(dataArrTest,labelArrTest)
