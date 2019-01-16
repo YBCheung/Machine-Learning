@@ -1,16 +1,16 @@
 from numpy import *
 import random
-def random_points()
-	for i in range(100):
-		a=random.uniform(1,9)
-		b=random.uniform(1,9)
-		if a<2*b:
+def random_points():
+	for i in range(1000):
+		a=random.uniform(1,99)
+		b=random.uniform(1,99)
+		if a<5*b+2:
 			c=1
 		else:
 			c=0
-		print("%.1f,%.1f,%d"%(a,b+10,c))
+		print("%.1f,%.1f,%d"%(a,b,c))
 
-def add_weight_for_train()
+def add_weight_for_train():
 	m=5
 	a=[1,2,3,4,5]
 	alpha=[]
@@ -24,3 +24,4 @@ def add_weight_for_train()
 	alpha=mat(alpha)
 	print(alpha)
 
+random_points()
